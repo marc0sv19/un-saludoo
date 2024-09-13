@@ -14,7 +14,7 @@ class ConfirmUserHandler(
             command.nombre,
             command.username,
             command.email,
-            command.contraseña
+            command.password
         )
 
         userRepository.save(user)

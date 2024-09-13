@@ -90,7 +90,7 @@ data class UserCreate(
     var nombre: String,
     val username: String,
     val email: String,
-    val contraseña: String
+    val password: String
 ) {
     private var events: MutableList<DomainEvent> = mutableListOf()
 
@@ -101,7 +101,7 @@ data class UserCreate(
                 primitives["nombre"] as? String ?: "",
                 primitives["username"] as? String ?: "",
                 primitives["email"] as? String ?: "",
-                primitives["contraseña"] as? String ?: ""
+                primitives["password"] as? String ?: ""
             )
         }
 
@@ -109,7 +109,7 @@ data class UserCreate(
             nombre: String,
             username: String,
             email: String,
-            contraseña: String // Corregir a singular
+            password: String // Corregir a singular
         ): UserCreate {
 
             val userCreate = UserCreate(
@@ -117,7 +117,7 @@ data class UserCreate(
                 nombre,
                 username,
                 email,
-                contraseña // Usar singular aquí también
+                password // Usar singular aquí también
             )
             return userCreate
         }
@@ -129,7 +129,7 @@ data class UserCreate(
             "nombre" to this.nombre,
             "username" to this.username,
             "email" to this.email,
-            "contraseña" to this.contraseña
+            "password" to this.password
         )
     }
 

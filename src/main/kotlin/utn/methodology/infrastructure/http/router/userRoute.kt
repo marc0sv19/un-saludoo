@@ -21,6 +21,7 @@ routing{
  post("/users"){
      println("Received POST request to /users")
      val body=call.receive<UserCommands>()
+     println("Body: $body")
      userAction.execute(body)
      call.respond(HttpStatusCode.Created, mapOf("message" to "ok"))
  }

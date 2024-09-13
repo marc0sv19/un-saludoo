@@ -29,7 +29,7 @@ class UserMongoRepository(private val database: MongoDatabase) : UserRepository 
         val filter = Document("_id",user.getUserId()) // Usa el campo id como filter
         val update = Document("\$set", user.toPrimitives())
 
-       collection.updateOne(filter, update, options)
+        collection.updateOne(filter, update, options)
     }
 
 
