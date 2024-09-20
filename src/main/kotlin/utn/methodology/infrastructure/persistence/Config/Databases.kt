@@ -26,6 +26,7 @@ fun Application.configureDatabases() {
  * @returns [MongoDatabase] instance
  * */
 fun Application.connectToMongoDB(): MongoDatabase {
+
     val user = environment.config.tryGetString("db.mongo.user")
     val password = environment.config.tryGetString("db.mongo.password")
     val host = environment.config.tryGetString("db.mongo.host") ?: "127.0.0.1"
@@ -36,6 +37,9 @@ fun Application.connectToMongoDB(): MongoDatabase {
     val credentials = user?.let { userVal -> password?.let { passwordVal -> "$userVal:$passwordVal@" } }.orEmpty()
 
     val uri = "mongodb://$credentials$host:$port/?maxPoolSize=$maxPoolSize&w=majority"
+
+    println("credentias ------------------ $credentials");
+    println(uri);
 
     val mongoClient = MongoClients.create(uri)
     val database = mongoClient.getDatabase(databaseName)
