@@ -1,7 +1,7 @@
 package utn.methodology.application.commandhandlers
 
 import utn.methodology.application.commands.UserCommands
-import utn.methodology.domain.entities.UserCreate
+import utn.methodology.domainentities.User
 import utn.methodology.infrastructure.persistence.Repositories.UserMongoRepository
 
 class ConfirmUserHandler(
@@ -10,7 +10,7 @@ class ConfirmUserHandler(
 ) {
     fun handle(command: UserCommands) {
 
-        val user = UserCreate.create(
+        val user = User.create(
             command.nombre,
             command.username,
             command.email,

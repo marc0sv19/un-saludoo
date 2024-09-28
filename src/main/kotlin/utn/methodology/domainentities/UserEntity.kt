@@ -1,4 +1,4 @@
-package utn.methodology.domain.entities
+package utn.methodology.domainentities
 
 import utn.methodology.application.domain.Events.*
 import java.util.UUID
@@ -85,7 +85,7 @@ import java.util.UUID
         return this.events
     }
 }*/
-data class UserCreate(
+data class User(
     val id: String,
     var nombre: String,
     val username: String,
@@ -95,8 +95,8 @@ data class UserCreate(
     private var events: MutableList<DomainEvent> = mutableListOf()
 
     companion object {
-        fun fromPrimitives(primitives: Map<String, Any>): UserCreate {
-            return UserCreate(
+        fun fromPrimitives(primitives: Map<String, Any>): User {
+            return User(
                 primitives["id"] as? String ?: "",
                 primitives["nombre"] as? String ?: "",
                 primitives["username"] as? String ?: "",
@@ -110,9 +110,9 @@ data class UserCreate(
             username: String,
             email: String,
             password: String // Corregir a singular
-        ): UserCreate {
+        ): User {
 
-            val userCreate = UserCreate(
+            val userCreate = User(
                 UUID.randomUUID().toString(),
                 nombre,
                 username,
@@ -123,7 +123,7 @@ data class UserCreate(
         }
     }
 
-    fun toPrimitives(): Map<String, Any?> {
+    fun toPrimitives(): Map<String, String> {
         return mapOf(
             "id" to this.id,
             "nombre" to this.nombre,

@@ -3,7 +3,7 @@ package utn.methodology.infrastructure.http.actions
 import utn.methodology.application.commandhandlers.ConfirmUserHandler
 import utn.methodology.application.commands.UserCommands
 
-class ConfirmUserAction(
+class SaveUserAction(
     private val handler: ConfirmUserHandler
 
 )

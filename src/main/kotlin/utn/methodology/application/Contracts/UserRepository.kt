@@ -1,9 +1,9 @@
 package utn.methodology.application.Contracts
 
-import utn.methodology.domain.entities.UserCreate
+import utn.methodology.domainentities.User
 
 
 interface UserRepository {
-    fun save(user: UserCreate)
-    fun findOne(id: String): UserCreate?
+    fun save(user: User)
+    fun findOne(id: String): User?
 }
