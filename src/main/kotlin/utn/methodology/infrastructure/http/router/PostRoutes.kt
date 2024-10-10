@@ -1,4 +1,5 @@
 package utn.methodology.infrastructure.http.router
+
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -43,6 +44,21 @@ fun Application.postRouter() {
                 call.respond(HttpStatusCode.OK, filteredPosts)
             } catch (ex: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
+            }
+        }
+        delete("/posts/{id}") {
+            val postId = call.parameters["id"]
+
+            if (postId.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "El ID del post es requerido.")
+                return@delete
+            }
+
+            try {
+                postHandler.deletePost(postId)
+                call.respond(HttpStatusCode.NoContent) // 204 No Content indica que la eliminación fue exitosa
+            } catch (ex: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud: ${ex.message}")
             }
         }
 

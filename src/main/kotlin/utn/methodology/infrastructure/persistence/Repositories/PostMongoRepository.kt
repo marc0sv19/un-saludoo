@@ -50,7 +50,13 @@ class PostMongoRepository(private val database: MongoDatabase) {
         }.toList()
     }
 
+
+
     fun deleteById(postId: String) {
-        collection.deleteOne(Post::id eq postId)
+        val objectId = ObjectId(postId) // Asegúrate de convertir el id a ObjectId
+        val filter = Document("_id", objectId)
+        collection.deleteOne(filter)//elimina de la colleccion el id pasado
     }
+
+
 }
