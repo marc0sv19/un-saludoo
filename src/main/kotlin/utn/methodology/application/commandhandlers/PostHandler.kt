@@ -6,17 +6,25 @@ import utn.methodology.infrastructure.persistence.Repositories.PostMongoReposito
 class PostHandler(
     private val postRepository: PostMongoRepository
 ) {
-
     fun createPost(userId: String, message: String): Post {
         if (message.length > 280) {
             throw PostValidationException("The post message exceeds the 280 character limit.")
         }
 
-        val post = Post.create(userId, message)
+        // Crear un mapa con los parámetros necesarios
+        val primitives = mapOf(
+            "userId" to userId,
+            "message" to message,
+            "createdAt" to System.currentTimeMillis().toString() // Timestamp actual
+        )
+
+        // Aquí se llama a `fromPrimitives` para crear el post
+        val post = Post.fromPrimitives(primitives)
         postRepository.save(post)
 
         return post
     }
+
     fun deletePost(postId: String) {
         postRepository.deleteById(postId)
     }

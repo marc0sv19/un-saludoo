@@ -7,17 +7,20 @@ data class Post(
     val id: String,
     val userId: String,
     val message: String,
+    val createdAt: String
 
 ) {
     companion object {
-        fun create(userId: String, message: String): Post {
+        fun fromPrimitives(primitives: Map<String, String>): Post {
             return Post(
-                id = UUID.randomUUID().toString(),
-                userId = userId,
-                message = message,
-
+                id = primitives["_id"] ?: "",  // Asegúrate de que la clave sea correcta
+                userId = primitives["userId"] ?: "",
+                message = primitives["message"] ?: "",
+                createdAt = primitives["createdAt"] ?: ""
             )
         }
+
+
     }
 
     fun toPrimitives(): Map<String, Any> {
@@ -25,6 +28,7 @@ data class Post(
             "id" to this.id,
             "userId" to this.userId,
             "message" to this.message,
+            "createdAt" to this.createdAt
 
         )
     }
