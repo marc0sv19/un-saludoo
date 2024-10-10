@@ -1,5 +1,6 @@
 package utn.methodology.domainentities
 
+import kotlinx.serialization.Serializable
 import utn.methodology.application.domain.Events.*
 import java.util.UUID
 
@@ -85,6 +86,8 @@ import java.util.UUID
         return this.events
     }
 }*/
+
+@Serializable
 data class User(
     val id: String,
     var nombre: String,
