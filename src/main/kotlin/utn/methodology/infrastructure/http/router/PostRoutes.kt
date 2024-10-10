@@ -1,3 +1,4 @@
+package utn.methodology.infrastructure.http.router
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -7,7 +8,6 @@ import kotlinx.serialization.Serializable
 import utn.methodology.application.commandhandlers.PostHandler
 import utn.methodology.application.commandhandlers.PostValidationException
 import utn.methodology.infrastructure.persistence.Repositories.PostMongoRepository
-import utn.methodology.domainentities.Post
 import utn.methodology.infrastructure.persistence.Config.connectToMongoDB
 
 fun Application.postRouter() {
@@ -45,28 +45,7 @@ fun Application.postRouter() {
                 call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
             }
         }
-    /*
-        get("/posts") {
-            val userId = call.request.queryParameters["userId"]
-            if (userId.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "El parámetro 'userId' es requerido.")
-                return@get
-            }
 
-            val posts = postRepository.findByUserId(userId) // Llama a tu repositorio para obtener los posts del usuario
-
-            // Convierte los posts a un formato que se puede devolver como JSON
-            val postResponse = posts.map { post ->
-                mapOf(
-                    "id" to post.id,
-                    "userId" to post.userId,
-                    "message" to post.message,
-                    "createdAt" to post.createdAt
-                )
-            }
-
-            call.respond(HttpStatusCode.OK, postResponse)
-        }*/
 
     }
 }
