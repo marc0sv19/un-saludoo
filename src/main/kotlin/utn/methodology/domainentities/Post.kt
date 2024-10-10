@@ -10,17 +10,16 @@ data class Post(
     val createdAt: String
 
 ) {
+
     companion object {
         fun fromPrimitives(primitives: Map<String, String>): Post {
             return Post(
-                id = primitives["_id"] ?: "",  // Asegúrate de que la clave sea correcta
-                userId = primitives["userId"] ?: "",
-                message = primitives["message"] ?: "",
-                createdAt = primitives["createdAt"] ?: ""
+                primitives["_id"] ?: "",  // Asegúrate de que la clave sea correcta
+                primitives["userId"] ?: "",
+                primitives["message"] ?: "",
+                primitives["createdAt"] ?: ""
             )
         }
-
-
     }
 
     fun toPrimitives(): Map<String, Any> {
@@ -32,4 +31,5 @@ data class Post(
 
         )
     }
+
 }

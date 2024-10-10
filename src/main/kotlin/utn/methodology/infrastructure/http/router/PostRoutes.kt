@@ -16,7 +16,7 @@ fun Application.postRouter() {
     val postHandler = PostHandler(postRepository )
     routing {
         postRoutes(postHandler)
-        /*get("/posts") {
+        get("/posts") {
             // Obtener los parámetros de consulta
             val userId = call.request.queryParameters["userId"]
             val order = call.request.queryParameters["order"] ?: "ASC" // Valor por defecto
@@ -45,7 +45,7 @@ fun Application.postRouter() {
                 call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
             }
         }
-    */
+    /*
         get("/posts") {
             val userId = call.request.queryParameters["userId"]
             if (userId.isNullOrBlank()) {
@@ -66,7 +66,7 @@ fun Application.postRouter() {
             }
 
             call.respond(HttpStatusCode.OK, postResponse)
-        }
+        }*/
 
     }
 }
