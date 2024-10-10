@@ -1,5 +1,4 @@
 package utn.methodology.infrastructure.http.router
-
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -14,7 +13,7 @@ import utn.methodology.infrastructure.persistence.Config.connectToMongoDB
 fun Application.postRouter() {
     val mongoDatabase = connectToMongoDB() // Conexión a la base de datos
     val postRepository = PostMongoRepository(mongoDatabase) // Repositorio de posts
-    val postHandler = PostHandler(postRepository )
+    val postHandler = PostHandler(postRepository)
     routing {
         postRoutes(postHandler)
         get("/posts") {
