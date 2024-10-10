@@ -24,6 +24,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.litote.kmongo:kmongo:4.9.0")
     implementation("io.ktor:ktor-server-core-jvm")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")

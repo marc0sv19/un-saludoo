@@ -5,47 +5,35 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import utn.methodology.application.commandhandlers.ConfirmUserHandler
-import utn.methodology.application.commandhandlers.SearchUserHandler
-import utn.methodology.application.commandhandlers.UserNotFoundException
+import kotlinx.serialization.Serializable
+import utn.methodology.application.commandhandlers.*
 import utn.methodology.infrastructure.persistence.Config.connectToMongoDB
 import utn.methodology.application.commands.UserCommands
 import utn.methodology.infrastructure.http.actions.SaveUserAction
 import utn.methodology.infrastructure.http.actions.SearchUserAction
+import utn.methodology.infrastructure.persistence.Repositories.PostMongoRepository
 import utn.methodology.infrastructure.persistence.Repositories.UserMongoRepository
 
-
 fun Application.userRoutes(){
-    val mongoDatabase=connectToMongoDB()//Conexion a base de datos
-    val repository= UserMongoRepository(mongoDatabase)//Agrega el repositorio a la ruta
-    val saveUserAction= SaveUserAction(ConfirmUserHandler(repository))//Agrega el controlador al action
+    val mongoDatabase=connectToMongoDB() // Conexión a base de datos
+    val repository = UserMongoRepository(mongoDatabase) // Agrega el repositorio a la ruta
+    val saveUserAction = SaveUserAction(ConfirmUserHandler(repository)) // Controlador para guardar usuarios
     val searchUserHandler = SearchUserHandler(repository)
     val searchUserAction = SearchUserAction(searchUserHandler)
+    val postRepository = PostMongoRepository(mongoDatabase)
+    val postHandler = PostHandler(postRepository )
+    // Llamamos a postRoutes
+      // Aquí debes pasar la instancia de PostHandler
 
-    routing{
- post("/users"){
-     println("Received POST request to /users")
-     val body=call.receive<UserCommands>()
-     println("Body: $body")
-     saveUserAction.execute(body)
-     call.respond(HttpStatusCode.Created, mapOf("message" to "ok"))
- }
-
-    /*get("/users/search") {
-        val username = call.request.queryParameters["username"]
-        if (username.isNullOrBlank()) {
-            call.respond(HttpStatusCode.BadRequest, "El parámetro 'username' es requerido.")
-            return@get
+    routing {
+        post("/users") {
+            println("Received POST request to /users")
+            val body = call.receive<UserCommands>()
+            println("Body: $body")
+            saveUserAction.execute(body)
+            call.respond(HttpStatusCode.Created, mapOf("message" to "ok"))
         }
-
-        // Ahora llamamos al método 'execute' de la instancia 'searchUserAction'
-        val user = findUserByUserNameAction.execute(username)
-        if (user != null) {
-            call.respond(HttpStatusCode.OK, user.toPrimitives())
-        } else {
-            call.respond(HttpStatusCode.NotFound, "Usuario no encontrado.")
-        }
-    }*/
+        postRoutes(postHandler)
         get("/users/search") {
             val username = call.request.queryParameters["username"]
             if (username.isNullOrBlank()) {
@@ -65,8 +53,32 @@ fun Application.userRoutes(){
             } catch (ex: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
             }
-
         }
-}
+    }
 }
 
+// Función postRoutes que maneja el POST para crear posts
+fun Route.postRoutes(postHandler: PostHandler) {
+    post("/posts") {
+        try {
+            println("Recibiendo solicitud para crear un post...")
+            val request = call.receive<PostRequest>()
+            println("Cuerpo de la solicitud: $request")
+
+            val post = postHandler.createPost(request.userId, request.message)
+            println("Post creado: $post")
+            call.respond(HttpStatusCode.Created, mapOf("message" to "ok"))
+            //call.respond(HttpStatusCode.Created, post)
+        } catch (e: PostValidationException) {
+            println("Error de validación del post: ${e.message}")
+            call.respond(HttpStatusCode.BadRequest, e.message ?: "Invalid post data")
+        } catch (e: Exception) {
+            println("Error inesperado: ${e.message}")
+            call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
+        }
+    }
+}
+
+
+@Serializable
+data class PostRequest(val userId: String, val message: String)
