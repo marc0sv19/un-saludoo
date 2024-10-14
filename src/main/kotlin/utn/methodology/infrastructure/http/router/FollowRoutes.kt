@@ -20,17 +20,12 @@ fun Application.followRouter() {
     routing {
         post("/follow") {
             try {
-                // Intentar recibir la solicitud
                 val followRequest = call.receive<Follower>() // Deserializa automáticamente
-                // Validaciones aquí
                 if (followRequest.followerId.isBlank() || followRequest.followedId.isBlank()) {
                     throw FollowValidationException("Follower ID y Followed ID son requeridos")
                 }
 
-                // Aquí puedes seguir con la lógica de tu aplicación
                 followHandler.followUser(followRequest.followerId, followRequest.followedId)
-
-                // Responder con éxito
                 call.respond(HttpStatusCode.Created, "El usuario ahora sigue al otro usuario")
             } catch (e: FollowValidationException) {
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "Datos inválidos")
@@ -41,9 +36,6 @@ fun Application.followRouter() {
                 call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud: ${e.message}")
             }
         }
-
-
-
 
         delete("/unfollow") {
             val followerId = call.request.queryParameters["followerId"]
@@ -57,5 +49,52 @@ fun Application.followRouter() {
             followHandler.unfollowUser(followerId, followedId)
             call.respond(HttpStatusCode.NoContent) // 204 No Content para indicar que la operación fue exitosa
         }
+
+        // Nueva ruta GET para obtener la lista de seguidores de un usuario
+        get("/followers/{userId}") {
+            try {
+                val userId = call.parameters["userId"]
+
+                if (userId.isNullOrBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, "User ID es requerido")
+                    return@get
+                }
+
+                // Obtener la lista de seguidores del usuario
+                val followers = followerRepository.getFollowers(userId)
+
+                if (followers.isEmpty()) {
+                    call.respond(HttpStatusCode.NotFound, "Este usuario no tiene seguidores")
+                } else {
+                    call.respond(HttpStatusCode.OK, followers)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud: ${e.message}")
+            }
+        }
+        get("/followed/{userId}") {
+            try {
+                val userId = call.parameters["userId"]
+
+                if (userId.isNullOrBlank()) {
+                    call.respond(HttpStatusCode.BadRequest, "User ID es requerido")
+                    return@get
+                }
+
+                // Obtener la lista de seguidores del usuario
+                val followed = followerRepository.getFollowed(userId)
+
+                if (followed.isEmpty()) {
+                    call.respond(HttpStatusCode.NotFound, "Este usuario no sigue a nadie")
+                } else {
+                    call.respond(HttpStatusCode.OK, followed)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud: ${e.message}")
+            }
+        }
+
     }
 }
