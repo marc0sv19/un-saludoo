@@ -35,7 +35,7 @@ class FollowerRepository(private val database: MongoDatabase) {
             )
         }.toList()
     }
-
+    
     fun getFollowed(userId: String): List<Follower> {
         val filter = Filters.eq("followerId", userId)
         return collection.find(filter).map { document ->
