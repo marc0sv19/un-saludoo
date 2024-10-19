@@ -9,13 +9,43 @@ import utn.methodology.application.commandhandlers.PostHandler
 import utn.methodology.application.commandhandlers.PostValidationException
 import utn.methodology.infrastructure.persistence.Repositories.PostMongoRepository
 import utn.methodology.infrastructure.persistence.Config.connectToMongoDB
+import utn.methodology.infrastructure.persistence.Repositories.UserMongoRepository
 
 fun Application.postRouter() {
     val mongoDatabase = connectToMongoDB() // Conexión a la base de datos
     val postRepository = PostMongoRepository(mongoDatabase) // Repositorio de posts
+    val userRepository = UserMongoRepository(mongoDatabase) // Repositorio de posts
+
     val postHandler = PostHandler(postRepository)
     routing {
-        postRoutes(postHandler)
+        post("/posts") {
+
+            try {
+
+                println("Recibiendo solicitud para crear un post...")
+                val request = call.receive<PostRequest>()
+                println("Cuerpo de la solicitud: $request")
+
+                if(userRepository.findOne(request.userId) !=null)
+                {
+                    val post = postHandler.createPost(request.userId, request.message)
+                    println("Post creado: $post")
+                    call.respond(HttpStatusCode.Created, mapOf("message" to "ok"))
+                    //call.respond(HttpStatusCode.Created, post)
+                }
+                else
+                {
+                    println("No se encontró el usuario por lo que no se puede agregar un post")
+                }
+
+            } catch (e: PostValidationException) {
+                println("Error de validación del post: ${e.message}")
+                call.respond(HttpStatusCode.BadRequest, e.message ?: "Invalid post data")
+            } catch (e: Exception) {
+                println("Error inesperado: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
+            }
+        }
         get("/posts") {
             // Obtener los parámetros de consulta
             val userId = call.request.queryParameters["userId"]
@@ -49,6 +79,7 @@ fun Application.postRouter() {
             val postId = call.parameters["id"]
 
             if (postId.isNullOrBlank()) {
+
                 call.respond(HttpStatusCode.BadRequest, "El ID del post es requerido.")
                 return@delete
             }
@@ -62,26 +93,6 @@ fun Application.postRouter() {
         }
 
 
-    }
-}
-fun Route.postRoutes(postHandler: PostHandler) {
-    post("/posts") {
-        try {
-            println("Recibiendo solicitud para crear un post...")
-            val request = call.receive<PostRequest>()
-            println("Cuerpo de la solicitud: $request")
-
-            val post = postHandler.createPost(request.userId, request.message)
-            println("Post creado: $post")
-            call.respond(HttpStatusCode.Created, mapOf("message" to "ok"))
-            //call.respond(HttpStatusCode.Created, post)
-        } catch (e: PostValidationException) {
-            println("Error de validación del post: ${e.message}")
-            call.respond(HttpStatusCode.BadRequest, e.message ?: "Invalid post data")
-        } catch (e: Exception) {
-            println("Error inesperado: ${e.message}")
-            call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
-        }
     }
 }
 

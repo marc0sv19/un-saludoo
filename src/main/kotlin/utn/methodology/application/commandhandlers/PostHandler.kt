@@ -28,6 +28,7 @@ class PostHandler(
     fun deletePost(postId: String) {
         postRepository.deleteById(postId)
     }
+
 }
 
 class PostValidationException(message: String) : Exception(message)
