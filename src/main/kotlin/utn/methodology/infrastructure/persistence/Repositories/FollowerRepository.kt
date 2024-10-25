@@ -26,7 +26,7 @@ class FollowerRepository(private val database: MongoDatabase) {
         collection.deleteOne(filter)
     }
 
-    fun getFollowers(userId: String): List<Follower> {
+    fun getFollowed(userId: String): List<Follower> {
         val filter = Filters.eq("followedId", userId)
         return collection.find(filter).map { document ->
             Follower(
@@ -36,7 +36,7 @@ class FollowerRepository(private val database: MongoDatabase) {
         }.toList()
     }
     
-    fun getFollowed(userId: String): List<Follower> {
+    fun getFollowers(userId: String): List<Follower> {
         val filter = Filters.eq("followerId", userId)
         return collection.find(filter).map { document ->
             Follower(

@@ -11,11 +11,13 @@ import utn.methodology.infrastructure.persistence.Repositories.FollowerRepositor
 import utn.methodology.infrastructure.persistence.Config.connectToMongoDB
 import utn.methodology.application.commandhandlers.FollowValidationException
 import utn.methodology.domainentities.Follower
+import utn.methodology.infrastructure.persistence.Repositories.UserMongoRepository
 
-fun Application.followRouter() {
+    fun Application.followRouter() {
     val mongoDatabase = connectToMongoDB() // Conexión a la base de datos
     val followerRepository = FollowerRepository(mongoDatabase)
     val followHandler = FollowHandler(followerRepository)
+    val userRepository = UserMongoRepository(mongoDatabase)
 
     routing {
         post("/follow") {
@@ -25,8 +27,26 @@ fun Application.followRouter() {
                     throw FollowValidationException("Follower ID y Followed ID son requeridos")
                 }
 
-                followHandler.followUser(followRequest.followerId, followRequest.followedId)
-                call.respond(HttpStatusCode.Created, "El usuario ahora sigue al otro usuario")
+                    if(userRepository.findOne(followRequest.followerId) !=null)
+                    {
+                        if(userRepository.findOne(followRequest.followedId) !=null)
+                        {
+                            followHandler.followUser(followRequest.followerId, followRequest.followedId)
+                            call.respond(HttpStatusCode.Created, "El usuario ahora sigue al otro usuario")
+                        }
+                        else
+                        {
+                            call.respond(HttpStatusCode.BadRequest,   "No se encontró el usuario a seguir")
+                        }
+                    }
+                    else
+                    {
+                        call.respond(HttpStatusCode.BadRequest,   "No se encontró el usuario que sigue")
+
+                    }
+
+
+
             } catch (e: FollowValidationException) {
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "Datos inválidos")
             } catch (e: SerializationException) {
@@ -64,7 +84,7 @@ fun Application.followRouter() {
                 val followers = followerRepository.getFollowers(userId)
 
                 if (followers.isEmpty()) {
-                    call.respond(HttpStatusCode.NotFound, "Este usuario no tiene seguidores")
+                    call.respond(HttpStatusCode.NotFound, "Este usuario no sigue a nadie")
                 } else {
                     call.respond(HttpStatusCode.OK, followers)
                 }
@@ -86,7 +106,7 @@ fun Application.followRouter() {
                 val followed = followerRepository.getFollowed(userId)
 
                 if (followed.isEmpty()) {
-                    call.respond(HttpStatusCode.NotFound, "Este usuario no sigue a nadie")
+                    call.respond(HttpStatusCode.NotFound, "Este usuario no tiene seguidores")
                 } else {
                     call.respond(HttpStatusCode.OK, followed)
                 }
