@@ -45,4 +45,18 @@ class FollowerRepository(private val database: MongoDatabase) {
             )
         }.toList()
     }
+    fun getFollowedIds(userId: String): List<String> {
+        val filter = Filters.eq("followerId", userId)
+        return collection.find(filter).mapNotNull { document ->
+            document.getString("followedId") // Extrae solo el campo followedId
+        }.toList()
+    }
+    fun getFollowerIds(userId: String): List<String> {
+        val filter = Filters.eq("followedId", userId)
+        return collection.find(filter).mapNotNull { document ->
+            document.getString("followerId") // Extrae solo el campo followerId
+        }.toList()
+    }
+
+
 }

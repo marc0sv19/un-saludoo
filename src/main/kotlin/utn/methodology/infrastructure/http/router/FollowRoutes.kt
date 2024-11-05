@@ -11,6 +11,7 @@ import utn.methodology.infrastructure.persistence.Repositories.FollowerRepositor
 import utn.methodology.infrastructure.persistence.Config.connectToMongoDB
 import utn.methodology.application.commandhandlers.FollowValidationException
 import utn.methodology.domainentities.Follower
+import utn.methodology.infrastructure.persistence.Repositories.PostMongoRepository
 import utn.methodology.infrastructure.persistence.Repositories.UserMongoRepository
 
     fun Application.followRouter() {
@@ -18,6 +19,7 @@ import utn.methodology.infrastructure.persistence.Repositories.UserMongoReposito
     val followerRepository = FollowerRepository(mongoDatabase)
     val followHandler = FollowHandler(followerRepository)
     val userRepository = UserMongoRepository(mongoDatabase)
+        val postRepository = PostMongoRepository(mongoDatabase)
 
     routing {
         post("/follow") {
@@ -93,6 +95,29 @@ import utn.methodology.infrastructure.persistence.Repositories.UserMongoReposito
                 call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud: ${e.message}")
             }
         }
+        get("/posts/user/{userId}"){
+            val userId = call.parameters["userId"]
+            if (userId.isNullOrBlank()) {
+                call.respond(HttpStatusCode.BadRequest, "El parámetro 'userId' es requerido.")
+                return@get
+            }
+            println("Lista Seguidores $userId")
+            try {
+                // Buscar los posts del usuario
+               val followed=followerRepository.getFollowedIds(userId)
+                println("Lista Seguidores $followed")
+                if (followed.isEmpty()) {
+                    call.respond(HttpStatusCode.NotFound, "Este usuario no sigue a nadie.")
+                    return@get
+                }
+                val posts = postRepository.findByUserIds(followed)// Buscar los posts de los usuarios seguidos
+                println("post de seguidos $posts")
+                call.respond(HttpStatusCode.OK, posts)
+            }
+            catch (ex: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
+            }
+            }
         get("/followed/{userId}") {
             try {
                 val userId = call.parameters["userId"]

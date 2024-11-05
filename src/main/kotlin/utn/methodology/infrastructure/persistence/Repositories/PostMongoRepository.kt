@@ -14,18 +14,38 @@ class PostMongoRepository(private val database: MongoDatabase) {
 
     private val collection: MongoCollection<Document> = database.getCollection("Posts")
     fun save(post: Post) {
-        val options = UpdateOptions().upsert(true)
-
-        val filter = if (post.id.isNotBlank()) {
-            Document("_id", post.id)
-        } else {
-            Document() // Deja que MongoDB genere el _id automáticamente
+        val document = Document().apply {
+            if (post.id.isNotBlank()) {
+                put("_id", post.id)
+            }
+            put("userId", post.userId)
+            put("message", post.message)
+            put("createdAt", post.createdAt)
         }
 
-        val update = Document("\$set", post.toPrimitives())
-        collection.updateOne(filter, update, options)
+
+
+        //val update = Document("\$set", post.toPrimitives())
+        collection.insertOne(document)
     }
 
+    fun findByUserIds(userIds: List<String>): List<Post> {
+        val filter = Document("userId", Document("\$in", userIds)) // Usa el operador $in
+        return collection.find(filter).map { document ->
+            println("Documento de post encontrado: $document")
+            val id = (document["_id"] as? ObjectId)?.toHexString() ?: document["_id"].toString()
+
+            val primitives = mapOf(
+                "_id" to id,
+                "userId" to document["userId"] as String,
+                "message" to document["message"] as String,
+                "createdAt" to document["createdAt"] as String
+            )
+            // Debug: mostrar el post creado
+            println("Post encontrado: $primitives")
+            Post.fromPrimitives(primitives)
+        }.toList()
+    }
 
     fun findByUserId(userId: String): List<Post> {
         val filter = Document("userId", userId)
