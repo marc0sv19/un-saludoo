@@ -1,23 +1,32 @@
 package utn.methodology.domainentities
 
 import kotlinx.serialization.Serializable
-import java.util.*
+import java.util.UUID
+
 @Serializable
 data class Post(
     val id: String,
     val userId: String,
     val message: String,
     val createdAt: String
-
 ) {
-
     companion object {
-        fun fromPrimitives(primitives: Map<String, String>): Post {
+        fun create(content: String, userId: String): Post {  // Cambia para aceptar userId
             return Post(
-                primitives["_id"] ?: "",  // Asegúrate de que la clave sea correcta
-                primitives["userId"] ?: "",
-                primitives["message"] ?: "",
-                primitives["createdAt"] ?: ""
+                id = UUID.randomUUID().toString(),
+                userId = userId,
+                message = content,
+                createdAt = System.currentTimeMillis().toString()
+            )
+        }
+
+        // Método `fromPrimitives` que crea un `Post` a partir de un mapa de primitivas.
+        fun fromPrimitives(primitives: Map<String, Any>): Post {
+            return Post(
+                primitives["_id"] as? String ?: UUID.randomUUID().toString(),
+                primitives["userId"] as? String ?: throw IllegalArgumentException("User ID is required"),
+                primitives["message"] as? String ?: throw IllegalArgumentException("Message is required"),
+                primitives["createdAt"] as? String ?: System.currentTimeMillis().toString()
             )
         }
     }
@@ -28,8 +37,11 @@ data class Post(
             "userId" to this.userId,
             "message" to this.message,
             "createdAt" to this.createdAt
-
         )
     }
 
+
+    fun getContent(): String {
+        return this.message
+    }
 }

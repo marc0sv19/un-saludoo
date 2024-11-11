@@ -110,7 +110,7 @@ import utn.methodology.infrastructure.persistence.Repositories.UserMongoReposito
                     call.respond(HttpStatusCode.NotFound, "Este usuario no sigue a nadie.")
                     return@get
                 }
-                val posts = postRepository.findByUserIds(followed)// Buscar los posts de los usuarios seguidos
+                val posts = postRepository.findByFollows(followed)// Buscar los posts de los usuarios seguidos
                 println("post de seguidos $posts")
                 call.respond(HttpStatusCode.OK, posts)
             }

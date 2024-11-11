@@ -1,4 +1,6 @@
+//Rutas HTTP, para la gestión de usuarios, haciendo operaciones de Post(Crear) y Get(Buscar)
 package utn.methodology.infrastructure.http.router
+
 
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -19,21 +21,20 @@ fun Application.userRoutes(){
     val repository = UserMongoRepository(mongoDatabase) // Agrega el repositorio a la ruta
     val saveUserAction = SaveUserAction(ConfirmUserHandler(repository)) // Controlador para guardar usuarios
     val searchUserHandler = SearchUserHandler(repository)
-    val searchUserAction = SearchUserAction(searchUserHandler)
+    val searchUserAction = SearchUserAction(searchUserHandler) //Para buscar usuarios
 
-    // Llamamos a postRoutes
-      // Aquí debes pasar la instancia de PostHandler
+
 
     routing {
         post("/users") {
             println("Received POST request to /users")
             val body = call.receive<UserCommands>()
             println("Body: $body")
-            saveUserAction.execute(body)
+            saveUserAction.execute(body) //Guarda el Usuario
             call.respond(HttpStatusCode.Created, mapOf("message" to "ok"))
         }
 
-        get("/users/search") {
+        get("/users/search") { //Recibe un Username y como parametro y lo busca con ese UserName
             val username = call.request.queryParameters["username"]
             if (username.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "El parámetro 'username' es requerido.")
@@ -56,4 +57,4 @@ fun Application.userRoutes(){
     }
 }
 
-// Función postRoutes que maneja el POST para crear posts
+

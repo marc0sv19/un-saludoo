@@ -31,7 +31,7 @@ class UserMongoRepository(private val database: MongoDatabase) : UserRepository 
         println("UserMongoRepository - Saving user: $User")
         val options = UpdateOptions().upsert(true);
 
-        val filter = Document("_id",user.getUserId()) // Usa el campo id como filter
+        val filter = Document("_id",user.getUserId())
         val update = Document("\$set", user.toPrimitives())
 
         collection.updateOne(filter, update, options)
@@ -56,5 +56,10 @@ class UserMongoRepository(private val database: MongoDatabase) : UserRepository 
             return null
         }
         return User.fromPrimitives(primitives as Map<String, String>)
+    }
+    override fun delete(user: User) {
+        val filter = Document("_id", user.getUserId());
+
+        collection.deleteOne(filter)
     }
 }

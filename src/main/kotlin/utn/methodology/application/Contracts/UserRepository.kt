@@ -6,4 +6,5 @@ import utn.methodology.domainentities.User
 interface UserRepository {
     fun save(user: User)
     fun findOne(id: String): User?
+    fun delete(user: User)
 }

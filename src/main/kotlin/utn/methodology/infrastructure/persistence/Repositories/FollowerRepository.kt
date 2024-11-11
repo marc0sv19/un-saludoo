@@ -16,7 +16,7 @@ class FollowerRepository(private val database: MongoDatabase) {
         val document = Document("followerId", follower.followerId)
             .append("followedId", follower.followedId)
 
-        // Lógica para insertar o actualizar la relación
+
         collection.insertOne(document)
     }
 
@@ -30,8 +30,8 @@ class FollowerRepository(private val database: MongoDatabase) {
         val filter = Filters.eq("followedId", userId)
         return collection.find(filter).map { document ->
             Follower(
-                followerId = document.getString("followerId"), // Esto debería estar bien
-                followedId = userId // Este es correcto ya que buscas "followedId"
+                followerId = document.getString("followerId"),
+                followedId = userId
             )
         }.toList()
     }
@@ -40,23 +40,18 @@ class FollowerRepository(private val database: MongoDatabase) {
         val filter = Filters.eq("followerId", userId)
         return collection.find(filter).map { document ->
             Follower(
-                followerId = userId, // Este es correcto ya que buscas "followerId"
-                followedId = document.getString("followedId") // Asegúrate de que esto sea correcto
+                followerId = userId,
+                followedId = document.getString("followedId")
             )
         }.toList()
     }
     fun getFollowedIds(userId: String): List<String> {
         val filter = Filters.eq("followerId", userId)
         return collection.find(filter).mapNotNull { document ->
-            document.getString("followedId") // Extrae solo el campo followedId
+            document.getString("followedId")
         }.toList()
     }
-    fun getFollowerIds(userId: String): List<String> {
-        val filter = Filters.eq("followedId", userId)
-        return collection.find(filter).mapNotNull { document ->
-            document.getString("followerId") // Extrae solo el campo followerId
-        }.toList()
-    }
+
 
 
 }

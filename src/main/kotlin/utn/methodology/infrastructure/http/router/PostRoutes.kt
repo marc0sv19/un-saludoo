@@ -14,54 +14,46 @@ import utn.methodology.infrastructure.persistence.Repositories.UserMongoReposito
 fun Application.postRouter() {
     val mongoDatabase = connectToMongoDB() // Conexión a la base de datos
     val postRepository = PostMongoRepository(mongoDatabase) // Repositorio de posts
-    val userRepository = UserMongoRepository(mongoDatabase) // Repositorio de posts
+    val userRepository = UserMongoRepository(mongoDatabase) // Repositorio de usuarios
 
-    val postHandler = PostHandler(postRepository)
+    // Crear el PostHandler pasando los repositorios en el orden correcto
+    val postHandler = PostHandler(userRepository, postRepository)
+
     routing {
         post("/posts") {
-
             try {
-
-                println("Recibiendo solicitud para crear un post...")
                 val request = call.receive<PostRequest>()
-                println("Cuerpo de la solicitud: $request")
-
-                if(userRepository.findOne(request.userId) !=null)
-                {
+                if (userRepository.findOne(request.userId) != null) {
+                    // Pasar ambos parámetros (userId y message)
                     val post = postHandler.createPost(request.userId, request.message)
-                    println("Post creado: $post")
                     call.respond(HttpStatusCode.Created, mapOf("message" to "ok"))
-                    //call.respond(HttpStatusCode.Created, post)
+                } else {
+                    call.respond(HttpStatusCode.BadRequest, "Usuario no encontrado")
                 }
-                else
-                {
-                    println("No se encontró el usuario por lo que no se puede agregar un post")
-                }
-
             } catch (e: PostValidationException) {
-                println("Error de validación del post: ${e.message}")
                 call.respond(HttpStatusCode.BadRequest, e.message ?: "Invalid post data")
             } catch (e: Exception) {
-                println("Error inesperado: ${e.message}")
                 call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
             }
         }
+
+        // Ruta para obtener posts
         get("/posts") {
-            // Obtener los parámetros de consulta
             val userId = call.request.queryParameters["userId"]
             val order = call.request.queryParameters["order"] ?: "ASC" // Valor por defecto
             val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 10 // Valor por defecto
             val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0 // Valor por defecto
 
-            // Validación de userId
             if (userId.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest, "El parámetro 'userId' es requerido.")
                 return@get
             }
 
             try {
-                // Buscar los posts del usuario
-                val posts = postRepository.findByUserId(userId)
+                // Convertir MongoIterable a una lista estándar de Kotlin
+                val posts = postRepository.findByUserId(userId).toList()
+
+
 
                 // Filtrar, ordenar y paginar según los parámetros
                 val filteredPosts = when (order.uppercase()) {
@@ -69,17 +61,17 @@ fun Application.postRouter() {
                     else -> posts.sortedBy { it.createdAt }.drop(offset).take(limit)
                 }
 
-                // Responder con la lista de posts
                 call.respond(HttpStatusCode.OK, filteredPosts)
             } catch (ex: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud")
             }
         }
+
+        // Ruta para eliminar un post
         delete("/posts/{id}") {
             val postId = call.parameters["id"]
 
             if (postId.isNullOrBlank()) {
-
                 call.respond(HttpStatusCode.BadRequest, "El ID del post es requerido.")
                 return@delete
             }
@@ -91,11 +83,8 @@ fun Application.postRouter() {
                 call.respond(HttpStatusCode.InternalServerError, "Error al procesar la solicitud: ${ex.message}")
             }
         }
-
-
     }
 }
-
 
 @Serializable
 data class PostRequest(val userId: String, val message: String)
