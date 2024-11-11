@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="utn.methodology.application.CreateUserHandlerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2024-11-11T15:07:54" hostname="DESKTOP-9VFQ11K" time="0.215">
+  <properties/>
+  <testcase name="create_user_should_returns_201" classname="utn.methodology.application.CreateUserHandlerTest" time="0.215"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
